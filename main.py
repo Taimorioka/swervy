@@ -4,6 +4,7 @@ from pybricks.parameters import (Port, Stop, Direction, Button)
 from definitions import (ButtonEvent, AxisCode, EventType, ButtonCode)
 from pybricks.tools import wait, StopWatch
 from pybricks.robotics import DriveBase
+from pybricks.messaging import *
 
 import struct
 
@@ -53,12 +54,16 @@ def scale(source, source_range, target_range):
 
 # Open the Gamepad event file:
 
-infile_path = "/dev/input/event4"
-in_file = open(infile_path, "rb")
+# infile_path = "/dev/input/event4"
+# in_file = open(infile_path, "rb")
 
 # Read from the file
-FORMAT = 'llHHI'    
-EVENT_SIZE = struct.calcsize(FORMAT)
+# FORMAT = 'llHHI'    
+# EVENT_SIZE = struct.calcsize(FORMAT)
+
+# server = BluetoothMailboxServer()
+client = BluetoothMailboxClient()
+mbox = TextMailbox('Data', client)
 
 #############
 # Main loop #
@@ -66,15 +71,15 @@ EVENT_SIZE = struct.calcsize(FORMAT)
 
 
 while True: 
-    event = in_file.read(EVENT_SIZE)
-    (_, _, ev_type, code, value) = struct.unpack(FORMAT, event)
+    # event = in_file.read(EVENT_SIZE)
+    # (_, _, ev_type, code, value) = struct.unpack(FORMAT, event)
 
-    if ev_type == EventType.AXIS:
-        # print(code)
-        if code == 1:
-            print(code, ev_type, value)
-            drive_speed = scale(value, (0,255), (100,-100))
-            print(drive_speed)
+    # if ev_type == EventType.AXIS:
+    #     # print(code)
+    #     if code == 1:
+    #         drive_speed = scale(value, (0,255), (100,-100))
+    #         print(drive_speed)
+    #         mbox.send(str(drive_speed))
     
     # Read analog stick values    
     # if ev_type == 3: # Stick or trigger moved
@@ -91,6 +96,10 @@ while True:
     #         print("L1 Pressed!")
     #     if code == 310 and value == 0:
     #         print("L1 Released")
+
+    mbox.wait()
+    drive_speed = mbox.read()
+    print(drive_speed)
         
 
     fl_motor.dc(drive_speed)
